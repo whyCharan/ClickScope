@@ -92,3 +92,8 @@ npm run dev
    - The system checks if these keywords exist in the **Transcript**.
    - A **High Score (>70%)** indicates a high mismatch (Likely Clickbait).
    - A **Low Score (<40%)** indicates good consistency.
+
+
+# Adjust score based on objects? 
+# E.g. if "person" is in thumbnail but no "person" in video? (Hard to detect in audio)
+# Ignoring objects for score for now, just returning them.
