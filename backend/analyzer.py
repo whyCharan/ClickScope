@@ -4,9 +4,7 @@ import whisper
 import easyocr
 from ultralytics import YOLO
 import cv2
-import numpy as np
 import re
-from collections import Counter
 import static_ffmpeg
 
 
@@ -52,9 +50,9 @@ def download_video_data(url, output_dir="temp"):
         video_id = info['id']
         title = info['title']
         
-        # files
+        
         audio_path = f"{output_dir}/{video_id}.mp3"
-        # thumbnail might be jpg or webp, find it
+        
         thumbnail_path = None
         for file in os.listdir(output_dir):
             if file.startswith(video_id) and file.lower().endswith(('.jpg', '.jpeg', '.png', '.webp')):
@@ -81,7 +79,7 @@ def analyze_thumbnail(image_path):
     # Manual load to ensure grayscale (fixes unpacking error in some easyocr versions)
     img = cv2.imread(image_path)
     if img is None:
-        return "", [] # Handle empty/failed read
+        return "", [] # Handle empty
         
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     ocr_result = reader.readtext(gray, detail=0)
@@ -98,18 +96,12 @@ def analyze_thumbnail(image_path):
     return thumbnail_text, list(set(objects)) # Unique objects
 
 def calculate_clickbait_score(title, thumbnail_text, transcript, objects):
-    """
-    Simple heuristic:
-    - Extract keywords from Thumbnail Text + Title.
-    - Check if they appear in the Transcript.
-    - The LOWER the overlap the HIGHER the clickbait score.
-    """
     
     def get_keywords(text):
-        # Remove special chars, lowercase, split
+        
         clean = re.sub(r'[^a-zA-Z0-9\s]', '', text.lower())
         words = clean.split()
-        # Remove common stop words (very basic list)
+        
         stop_words = {'the', 'is', 'in', 'at', 'of', 'on', 'and', 'a', 'to', 'for', 'with', 'it', 'this', 'that', 'my', 'video'}
         return set([w for w in words if w not in stop_words and len(w) > 2])
 
@@ -131,11 +123,8 @@ def calculate_clickbait_score(title, thumbnail_text, transcript, objects):
     if total_promises == 0:
         return 0, [], "No significant keywords found in title/thumbnail.", {}
         
-    score = 1 - (matches / total_promises) # 0 = Perfect match, 1 = Total Clickbait
+    score = 1 - (matches / total_promises)
     
-    # Adjust score based on objects? 
-    # E.g. if "person" is in thumbnail but no "person" in video? (Hard to detect in audio)
-    # Ignoring objects for score for now, just returning them.
     
     reasoning = f"Found {matches}/{total_promises} keywords in video."
     if score > 0.7:
