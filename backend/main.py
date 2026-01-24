@@ -46,7 +46,6 @@ async def analyze_video(request: VideoRequest):
         score, missing, reasoning, stats = analyzer.calculate_clickbait_score(title, thumbnail_text, transcript, objects)
         
         
-        
         return {
             "title": title,
             "clickbait_score": score,
