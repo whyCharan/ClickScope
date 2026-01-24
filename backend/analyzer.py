@@ -6,7 +6,9 @@ from ultralytics import YOLO
 import cv2
 import re
 import static_ffmpeg
-
+from nltk.stem import WordNetLemmatizer
+from nltk.corpus import stopwords
+import nltk
 
 static_ffmpeg.add_paths()
 
@@ -15,6 +17,12 @@ static_ffmpeg.add_paths()
 whisper_model = None
 reader = None
 yolo_model = None
+
+nltk.download('wordnet')
+nltk.download('stopwords')
+
+lemmatizer = WordNetLemmatizer()
+STOP_WORDS = set(stopwords.words('english'))
 
 def load_models():
     global whisper_model, reader, yolo_model
@@ -98,12 +106,16 @@ def analyze_thumbnail(image_path):
 def calculate_clickbait_score(title, thumbnail_text, transcript, objects):
     
     def get_keywords(text):
-        
         clean = re.sub(r'[^a-zA-Z0-9\s]', '', text.lower())
         words = clean.split()
-        
-        stop_words = {'the', 'is', 'in', 'at', 'of', 'on', 'and', 'a', 'to', 'for', 'with', 'it', 'this', 'that', 'my', 'video'}
-        return set([w for w in words if w not in stop_words and len(w) > 2])
+
+        keywords = [
+            lemmatizer.lemmatize(w)
+            for w in words
+                if w not in STOP_WORDS and len(w) > 2
+            ]
+
+        return set(keywords)
 
     
     promise_keywords = get_keywords(title + " " + thumbnail_text)
