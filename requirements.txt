@@ -11,7 +11,7 @@ ultralytics
 numpy
 imageio-ffmpeg
 scikit-learn
-nltk
 setuptools
 static-ffmpeg
 opencv-python
+nltk
